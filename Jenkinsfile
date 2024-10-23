@@ -2,11 +2,8 @@
 
 pipeline {
     agent {
-        kubernetes {
-            defaultContainer 'maven'
-        }
+        label 'default'
     }
-
     stages {
         stage('Run maven') {
             steps {
