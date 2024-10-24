@@ -11,7 +11,7 @@ pipeline {
             spec:
               containers:
               - name: docker
-                image: docker:20.10.8
+                image: jenkins/jnlp-agent-docker
                 securityContext:
                   privileged: true
                 volumeMounts:
