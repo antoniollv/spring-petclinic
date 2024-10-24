@@ -2,10 +2,12 @@
 pipeline {
     agent {
         kubernetes {
-            label 'docker-agent'
             yaml '''
             apiVersion: v1
             kind: Pod
+            metadata:
+              labels:
+                some-label: docker-pod
             spec:
               containers:
               - name: docker
@@ -15,14 +17,10 @@ pipeline {
                 volumeMounts:
                 - name: docker-socket
                   mountPath: /var/run/docker.sock
-                - name: workspace-volume
-                  mountPath: /workspace
               volumes:
               - name: docker-socket
                 hostPath:
                   path: /var/run/docker.sock
-              - name: workspace-volume
-                emptyDir: {}
             '''
         }
     }
