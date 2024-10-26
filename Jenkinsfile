@@ -2,7 +2,7 @@
 
 pipeline {
     agent {
-        label 'node-default'
+        label 'pod-default'
     }
     stages {
         stage('Build') {
