@@ -2,7 +2,7 @@
 
 pipeline {
     agent {
-        label 'default'
+        label 'node-default'
     }
     stages {
         stage('Build') {
