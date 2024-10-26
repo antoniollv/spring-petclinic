@@ -6,6 +6,10 @@ pipeline {
     }
     stages {
         stage('Build') {
+            when {
+                branch 'main'
+                //branch 'develop'
+            }
             steps {
                 container('maven') {
                     println '01# Stage - Build'
@@ -15,13 +19,16 @@ pipeline {
                         mvn -version
                         pwd
                         ls -la
-                        ./mvnw package
+                        ./mvnw package -Dmaven.test.skip=true
                         ls -la
                     '''
                 }
             }
         }
         stage('Unit Tests') {
+            when {
+                branch 'develop'
+            }
             steps {
                 container('maven') {
                     println '04# Stage - Unit Tests'
@@ -31,7 +38,8 @@ pipeline {
                         mvn -version
                         pwd
                         ls -la
-                        mvn test
+                        mvn clean test
+                        junit '**/target/surefire-reports/*.xml'
                         ls -la
                     '''
                 }
