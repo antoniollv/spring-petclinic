@@ -18,9 +18,7 @@ pipeline {
                         java -version
                         mvn -version
                         pwd
-                        ls -la
                         ./mvnw package -Dmaven.test.skip=true
-                        ls -la
                     '''
                 }
             }
@@ -37,11 +35,9 @@ pipeline {
                         java -version
                         mvn -version
                         pwd
-                        ls -la
                         mvn clean test
-                        junit '**/target/surefire-reports/*.xml'
-                        ls -la
                     '''
+                    junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
