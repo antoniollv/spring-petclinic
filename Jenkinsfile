@@ -6,8 +6,8 @@ pipeline {
     }
     stages {
         stage('Build') {
-            container ('maven') {
-                steps {
+            steps {
+                container('maven') {
                     println '01# Stage - Build'
                     println '(develop y main):  Build a jar file.'
                     sh '''
@@ -22,8 +22,8 @@ pipeline {
             }
         }
         stage('Unit Tests') {
-            container ('maven') {
-                steps {
+            steps {
+                container('maven') {
                     println '04# Stage - Unit Tests'
                     println '(develop y main): Launch unit tests.'
                     sh '''
