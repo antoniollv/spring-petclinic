@@ -1,48 +1,32 @@
 #!/usr/bin/env groovy
+
 pipeline {
     agent {
-        kubernetes {
-            yaml '''
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              labels:
-                some-label: docker-pod
-            spec:
-              containers:
-              - name: docker
-                image: jenkins/jnlp-agent-docker
-                securityContext:
-                  privileged: true
-                volumeMounts:
-                - name: docker-socket
-                  mountPath: /var/run/docker.sock
-              volumes:
-              - name: docker-socket
-                hostPath:
-                  path: /var/run/docker.sock
-            '''
-        }
+        label 'default'
     }
     stages {
-        stage('Construir imagen Docker') {
+        stage('Build') {
             steps {
-                container('docker') {
-                    sh '''
-                        docker image ls
-                        ./mvnw spring-boot:build-image
-                        docker image ls
-                    '''
-                }
+                println '01# Stage - Build'
+                println '(develop y main):  Build a jar file.'
+                sh '''
+                    pwd
+                    mvn -version
+                    ./mvnw package
+                    ls -la
+                '''
             }
         }
-    }
-    post {
-        success {
-            echo 'Pipeline completado exitosamente'
-        }
-        failure {
-            echo 'Pipeline fallido'
+        stage('Unit Tests') {
+            steps {
+                println '04# Stage - Unit Tests'
+                println '(develop y main): Launch unit tests.'
+                sh '''
+                    pwd
+                    mvn test
+                    ls -la
+                '''
+            }
         }
     }
 }
