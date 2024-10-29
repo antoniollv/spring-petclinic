@@ -8,7 +8,7 @@ pipeline {
         stage('Build') {
             when {
                 branch 'main'
-                //branch 'develop'
+                branch 'develop'
             }
             steps {
                 container('maven') {
