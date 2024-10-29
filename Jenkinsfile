@@ -44,6 +44,8 @@ pipeline {
         stage('Deploy Artifact') {
             steps {
                 container('maven') {
+                    println '03# Stage - Deploy Artifact'
+                    println '(develop y main): Deploy artifact to repository.'
                     sh '''
                         mvn deploy \
                         -DgroupId=com.ejemplo \
