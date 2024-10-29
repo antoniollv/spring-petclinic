@@ -29,7 +29,7 @@ pipeline {
             }
             steps {
                 container('maven') {
-                    println '04# Stage - Unit Tests'
+                    println '02# Stage - Unit Tests'
                     println '(develop y main): Launch unit tests.'
                     sh '''
                         java -version
@@ -38,6 +38,24 @@ pipeline {
                         mvn clean test
                     '''
                     junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Deploy Artifact') {
+            steps {
+                container('maven') {
+                    sh '''
+                        mvn deploy \
+                        -DgroupId=com.ejemplo \
+                        -DartifactId=spring-petclinic \
+                        -Dversion=3.3.0-SNAPSHOT \
+                        -Dpackaging=jar \
+                        -Dfile=target/spring-petclinic-3.3.0-SNAPSHOT.jar \
+                        -DrepositoryId=maven-snapshots \
+                        -Durl=https://nexus:8081/repository/maven-snapshots \
+                        -Dusername=anonymous \
+                        -Dpassword=''
+                    '''
                 }
             }
         }
