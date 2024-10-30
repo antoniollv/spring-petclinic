@@ -6,7 +6,7 @@ pipeline {
     }
     stages {
         stage('Check Environment') {
-            setps{
+            steps {
                 sh 'java -version'
                 container('maven') {
                     sh '''
