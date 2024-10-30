@@ -47,7 +47,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Artifact') {
+        stage('Publish Artifact') {
             steps {
                 container('maven') {
                     println '03# Stage - Deploy Artifact'
@@ -60,6 +60,22 @@ pipeline {
                             -Dversion=3.3.0-SNAPSHOT \
                             -Dpackaging=jar \
                             -Dfile=target/spring-petclinic-3.3.0-SNAPSHOT.jar
+                    '''
+                }
+            }
+        }
+        stage('Build & Publish Container Image') {
+            steps {
+                container('kaniko') {
+                    println '04# Stage - Build & Publish Container Image'
+                    println '(develop y main): Build container image with Kaniko & Publish to container registry.'
+                    sh '''
+                        /kaniko/executor \
+                        --context `pwd` \
+                        --dockerfile Dockerfile \
+                        --destination=nexus-service/repository/docker/spring-petclinic:3.3.0-SNAPSHOT \
+                        --destination=nexus-service/repository/docker/spring-petclinic:latest \
+                        --build-arg JAR_FILE=spring-petclinic-3.3.0-SNAPSHOT.jar
                     '''
                 }
             }
