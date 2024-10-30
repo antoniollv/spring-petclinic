@@ -47,16 +47,13 @@ pipeline {
                     println '03# Stage - Deploy Artifact'
                     println '(develop y main): Deploy artifact to repository.'
                     sh '''
-                        mvn deploy \
-                        -DgroupId=com.ejemplo \
+                        mvn deploy:deploy-file \
+                        -DgroupId=com.example \
                         -DartifactId=spring-petclinic \
                         -Dversion=3.3.0-SNAPSHOT \
                         -Dpackaging=jar \
                         -Dfile=target/spring-petclinic-3.3.0-SNAPSHOT.jar \
-                        -DrepositoryId=maven-snapshots \
-                        -Durl=https://nexus:8081/repository/maven-snapshots \
-                        -Dusername=anonymous \
-                        -Dpassword=''
+                        -DaltDeploymentRepository=snapshot-repo::default::https://nexus:8081/repository/maven-snapshots
                     '''
                 }
             }
