@@ -7,8 +7,10 @@ pipeline {
     stages {
         stage('Build') {
             when {
-                branch 'main'
-                branch 'develop'
+                anyOf {
+                    branch 'main'
+                    branch 'develop'
+                }
             }
             steps {
                 container('maven') {
