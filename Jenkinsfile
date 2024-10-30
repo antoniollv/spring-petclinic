@@ -73,8 +73,8 @@ pipeline {
                         /kaniko/executor \
                         --context `pwd` \
                         --dockerfile Dockerfile \
-                        --destination=http://nexus-service:8082/repository/docker/spring-petclinic:3.3.0-SNAPSHOT \
-                        --destination=http://nexus-service:8082/repository/docker/spring-petclinic:latest \
+                        --destination=http://nexus-service:8081/repository/docker/spring-petclinic:3.3.0-SNAPSHOT \
+                        --destination=http://nexus-service:8081/repository/docker/spring-petclinic:latest \
                         --build-arg JAR_FILE=spring-petclinic-3.3.0-SNAPSHOT.jar
                     '''
                 }
