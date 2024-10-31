@@ -73,6 +73,7 @@ pipeline {
                     sh '''
                         /kaniko/executor \
                         --context `pwd` \
+                        --insecure \
                         --dockerfile Dockerfile \
                         --destination=nexus-service:8082/repository/docker/spring-petclinic:3.3.0-SNAPSHOT \
                         --destination=nexus-service:8082/repository/docker/spring-petclinic:latest \
