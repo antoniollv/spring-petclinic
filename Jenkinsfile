@@ -69,6 +69,7 @@ pipeline {
                 container('kaniko') {
                     println '04# Stage - Build & Publish Container Image'
                     println '(develop y main): Build container image with Kaniko & Publish to container registry.'
+                    input 'Please wait...'
                     sh '''
                         /kaniko/executor \
                         --context `pwd` \
