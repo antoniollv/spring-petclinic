@@ -1,12 +1,11 @@
 #!/usr/bin/env groovy
-
 pipeline {
-    agent {
-        label 'pod-default'
-    }
+    agent { label 'pod-default' }
     stages {
         stage('Check Environment') {
             steps {
+                println '01# Stage - Check Environment'
+                println '(develop y main):  Checking environment Java & Maven versions.'
                 sh 'java -version'
                 container('maven') {
                     sh '''
@@ -19,14 +18,12 @@ pipeline {
         }
         stage('Build') {
             when {
-                anyOf {
-                    branch 'main'
-                    branch 'develop'
-                }
+                branch 'main'
+                branch 'develop'
             }
             steps {
                 container('maven') {
-                    println '01# Stage - Build'
+                    println '02# Stage - Build'
                     println '(develop y main):  Build a jar file.'
                     sh './mvnw package -Dmaven.test.skip=true'
                 }
@@ -34,11 +31,12 @@ pipeline {
         }
         stage('Unit Tests') {
             when {
+                branch 'main'
                 branch 'develop'
             }
             steps {
                 container('maven') {
-                    println '02# Stage - Unit Tests'
+                    println '03# Stage - Unit Tests'
                     println '(develop y main): Launch unit tests.'
                     sh '''
                         mvn test
@@ -48,9 +46,13 @@ pipeline {
             }
         }
         stage('Publish Artifact') {
+            when {
+                branch 'main'
+                branch 'develop'
+            }
             steps {
                 container('maven') {
-                    println '03# Stage - Deploy Artifact'
+                    println '04# Stage - Deploy Artifact'
                     println '(develop y main): Deploy artifact to repository.'
                     sh '''
                         mvn -e deploy:deploy-file \
@@ -65,9 +67,13 @@ pipeline {
             }
         }
         stage('Build & Publish Container Image') {
+            when {
+                branch 'main'
+                branch 'develop'
+            }
             steps {
                 container('kaniko') {
-                    println '04# Stage - Build & Publish Container Image'
+                    println '05# Stage - Build & Publish Container Image'
                     println '(develop y main): Build container image with Kaniko & Publish to container registry.'
                     input 'Please wait...'
                     sh '''
@@ -80,6 +86,31 @@ pipeline {
                         --build-arg JAR_FILE=spring-petclinic-3.3.0-SNAPSHOT.jar
                     '''
                 }
+            }
+        }
+        stage('Deploy petclinic') {
+            when {
+                branch 'main'
+                branch 'develop'
+            }
+            steps {
+                println '06# Stage - Deploy petclinic'
+                println '(develop y main): Deploy petclinic app to MicroK8s.'
+                sh '''
+                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mkdir -p ~/.local/bin
+                    #mv ./kubectl ~/.local/bin/kubectl
+
+                    ./kubectl version --client
+                    ./kubectl get all
+
+                    ./kubectl create deployment petclinic --image sonar-service:8082/repository/docker/spring-petclinic:latest || \
+                    echo 'Deplyment petclinic already exists, creating service...'
+                    ./kubectl expose deployment petclinic --port 8080 --target-port 8888 --selector app=petclinic --type ClusterIP --name petclinic
+
+                    ./kubectl get all
+                '''
             }
         }
     }
