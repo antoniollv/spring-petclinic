@@ -4,6 +4,9 @@ def CURRENT_VERSION = ''
 
 pipeline {
     agent { label 'pod-default' }
+    environment {
+        GIT_USERNAME="antoniollv"
+    }
     stages {
         stage('Check Environment') {
             steps {
@@ -156,15 +159,17 @@ pipeline {
                 container('maven') {
                     println '07# Stage - Release Promotion Branch main'
                     println '(develop): Release Promotion Branch main update pom version'
-                    script {
-                        def releaseVersion = CURRENT_VERSION.replace('-SNAPSHOT', '')
-
-                        sh "mvn versions:set -DnewVersion=${releaseVersion}"
-
-                        sh 'git add pom.xml'
-                        sh "git commit -m 'Jenkins promotion ${releaseVersion}'"
-                        sh 'git checkout -b main || git checkout main'
-                        sh 'git push origin main'
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GIT_PASSWORD')]) {
+                        script {
+                            def releaseVersion = CURRENT_VERSION.replace('-SNAPSHOT', '')
+                            def repoUrl = GIT_URL.replace('https://', "https://${GIT_USERNAME}:${GIT_PASSWORD}@")
+                            sh "mvn versions:set -DnewVersion=${releaseVersion}"
+                            sh 'git add pom.xml'
+                            sh "git commit -m 'Jenkins promotion ${releaseVersion}'"
+                            sh 'git checkout -b main || git checkout main'
+                            sh "git remote set-url origin ${repoUrl}"
+                            sh 'git push origin main'
+                        }
                     }
                 }
             }
@@ -177,17 +182,18 @@ pipeline {
                 container('maven') {
                     println '07# Stage - Release Promotion Branch develop'
                     println '(main): Release Promotion Branch develop update pom version'
-                    script {
-                        def (major, minor, patch) = CURRENT_VERSION.split('\\.')
-                        def newSnapshotVersion = "${major}.${minor}.${patch.toInteger() + 1}-SNAPSHOT"
-
-                        sh "mvn versions:set -DnewVersion=${newSnapshotVersion}"
-
-                        sh 'git add pom.xml'
-                        sh "git commit -m 'Jenkins promotion ${newSnapshotVersion}'"
-
-                        sh 'git checkout -b develop || git checkout develop'
-                        sh 'git push origin develop'
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GIT_PASSWORD')]) {
+                        script {
+                            def (major, minor, patch) = CURRENT_VERSION.split('\\.')
+                            def newSnapshotVersion = "${major}.${minor}.${patch.toInteger() + 1}-SNAPSHOT"
+                            def repoUrl = GIT_URL.replace('https://', "https://${GIT_USERNAME}:${GIT_PASSWORD}@")
+                            sh "mvn versions:set -DnewVersion=${newSnapshotVersion}"
+                            sh 'git add pom.xml'
+                            sh "git commit -m 'Jenkins promotion ${newSnapshotVersion}'"
+                            sh 'git checkout -b develop || git checkout develop'
+                            sh "git remote set-url origin ${repoUrl}"
+                            sh 'git push origin develop'
+                        }
                     }
                 }
             }
