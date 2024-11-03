@@ -13,8 +13,11 @@ pipeline {
                         mvn -version
                         pwd
                         env
+                        git config --global --add safe.directory $PWD
+                        git config --global --add user.email "jenkins@domain.local"
+                        git config --global --add user.name "Jenkins Server"
                     '''
-                    sh 'git config --global --add safe.directory $PWD'
+
                     script {
                         CURRENT_VERSION = currentVersion()
                     }
@@ -102,7 +105,7 @@ pipeline {
                         --dockerfile Dockerfile \
                         --destination=nexus-service:8082/repository/docker/spring-petclinic:${CURRENT_VERSION} \
                         --destination=nexus-service:8082/repository/docker/spring-petclinic:latest \
-                        --build-arg JAR_FILE=spring-petclinic-${CURRENT_VERSION}.jar
+                        --build-arg VERSION=${CURRENT_VERSION}.jar
                     """
                 }
             }
@@ -123,7 +126,7 @@ pipeline {
                 println '06# Stage - Deploy petclinic'
                 println '(develop y main): Deploy petclinic app to MicroK8s.'
                 sh '''
-                    curl -LO "https://dl.k8s.io/release/\$(curl -L \
+                    curl -LO "https://dl.k8s.io/release/$(curl -L \
                         -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                     chmod +x kubectl
                     mkdir -p ~/.local/bin
@@ -131,7 +134,7 @@ pipeline {
 
                     ./kubectl version --client
 
-                    export IP_SERVICIO_NEXUS=\$(kubectl get services| grep 'nexus' | awk '{print \$3}')
+                    export IP_SERVICIO_NEXUS=$(kubectl get services| grep 'nexus' | awk '{print $3}')
 
                     ./kubectl delete service petclinic-$ENVIRONMENT || echo 'Service not found'
                     ./kubectl delete deployment petclinic-$ENVIRONMENT || echo 'Deployment not found'
