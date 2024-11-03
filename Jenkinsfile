@@ -1,9 +1,9 @@
 #!/usr/bin/env groovy
+
+def CURRENT_VERSION = ''
+
 pipeline {
     agent { label 'pod-default' }
-    environment {
-        CURRENT_VERSION = ''
-    }
     stages {
         stage('Check Environment') {
             steps {
@@ -14,13 +14,13 @@ pipeline {
                         pwd
                     '''
                     script {
-                        env.CURRENT_VERSION = currentVersion()
+                        CURRENT_VERSION = currentVersion()
                     }
                 }
                 println '01# Stage - Check Environment'
                 println '(develop y main):  Checking environment Java & Maven versions.'
                 sh 'java -version'
-                echo env.CURRENT_VERSION
+                echo CURRENT_VERSION
             }
         }
         stage('Build') {
@@ -76,9 +76,9 @@ pipeline {
                     //         -Durl=http://nexus-service:8081/repository/${ env.MAVE_REPOSITORY } \
                     //         -DgroupId=local.moradores \
                     //         -DartifactId=spring-petclinic \
-                    //         -Dversion=${ env.CURRENT_VERSION } \
+                    //         -Dversion=${CURRENT_VERSION} \
                     //         -Dpackaging=jar \
-                    //         -Dfile=target/spring-petclinic-${ env.CURRENT_VERSION }.jar
+                    //         -Dfile=target/spring-petclinic-${CURRENT_VERSION}.jar
                     // """
                 }
             }
@@ -99,9 +99,9 @@ pipeline {
                         --context `pwd` \
                         --insecure \
                         --dockerfile Dockerfile \
-                        --destination=nexus-service:8082/repository/docker/spring-petclinic:${ env.CURRENT_VERSION} \
+                        --destination=nexus-service:8082/repository/docker/spring-petclinic:${CURRENT_VERSION} \
                         --destination=nexus-service:8082/repository/docker/spring-petclinic:latest \
-                        --build-arg JAR_FILE=spring-petclinic-${ env.CURRENT_VERSION}.jar
+                        --build-arg JAR_FILE=spring-petclinic-${CURRENT_VERSION}.jar
                     """
                 }
             }
@@ -150,7 +150,7 @@ pipeline {
                 println '07# Stage - Release Promotion Branch main'
                 println '(develop): Release Promotion Branch main update pom version'
                 script {
-                    def releaseVersion = env.CURRENT_VERSION.replace('-SNAPSHOT', '')
+                    def releaseVersion = CURRENT_VERSION.replace('-SNAPSHOT', '')
 
                     sh "mvn versions:set -DnewVersion=${releaseVersion}"
 
@@ -168,7 +168,7 @@ pipeline {
                 println '07# Stage - Release Promotion Branch develop'
                 println '(main): Release Promotion Branch develop update pom version'
                 script {
-                    def (major, minor, patch) = env.CURRENT_VERSION.split('\\.')
+                    def (major, minor, patch) = CURRENT_VERSION.split('\\.')
                     def newSnapshotVersion = "${major}.${minor}.${patch.toInteger() + 1}-SNAPSHOT"
 
                     sh "mvn versions:set -DnewVersion=${newSnapshotVersion}"
