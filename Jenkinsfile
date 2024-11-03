@@ -134,7 +134,7 @@ pipeline {
 
                     ./kubectl version --client
 
-                    export IP_SERVICIO_NEXUS=$(kubectl get services| grep 'nexus' | awk '{print $3}')
+                    export IP_SERVICIO_NEXUS=$(./kubectl get services | grep 'nexus' | awk '{print $3}')
 
                     ./kubectl delete service petclinic-$ENVIRONMENT || echo 'Service not found'
                     ./kubectl delete deployment petclinic-$ENVIRONMENT || echo 'Deployment not found'
@@ -163,7 +163,7 @@ pipeline {
 
                         sh 'git add pom.xml'
                         sh "git commit -m 'Jenkins promotion ${releaseVersion}'"
-                        sh 'git push origin master'
+                        sh 'git push origin main'
                     }
                 }
             }
