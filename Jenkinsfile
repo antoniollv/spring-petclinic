@@ -123,7 +123,7 @@ pipeline {
                 println '06# Stage - Deploy petclinic'
                 println '(develop y main): Deploy petclinic app to MicroK8s.'
                 sh """
-                    curl -LO "https://dl.k8s.io/release/\\$(curl -L \
+                    curl -LO "https://dl.k8s.io/release/\\\$(curl -L \
                         -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                     chmod +x kubectl
                     mkdir -p ~/.local/bin
@@ -131,7 +131,7 @@ pipeline {
 
                     ./kubectl version --client
 
-                    export IP_SERVICIO_NEXUS=\\$(kubectl get services| grep 'nexus' | awk '{print $3}')
+                    export IP_SERVICIO_NEXUS=\\\$(kubectl get services| grep 'nexus' | awk '{print $3}')
 
                     ./kubectl delete service petclinic-$ENVIRONMENT || echo 'Service not found'
                     ./kubectl delete deployment petclinic-$ENVIRONMENT || echo 'Deployment not found'
