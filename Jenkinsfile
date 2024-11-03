@@ -79,6 +79,8 @@ pipeline {
                     println '04# Stage - Deploy Artifact'
                     println '(develop y main): Deploy artifact to repository.'
                     sh """
+                        mv target/spring-petclinic-${CURRENT_VERSION}.jar.original target/spring-petclinic-${CURRENT_VERSION}.jar \
+                        || echo 'Nada que mover'
                         mvn -e deploy:deploy-file \
                             -Durl=http://nexus-service:8081/repository/${ env.MAVE_REPOSITORY } \
                             -DgroupId=local.moradores \
