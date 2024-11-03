@@ -12,6 +12,7 @@ pipeline {
                         java -version
                         mvn -version
                         pwd
+                        env
                     '''
                     script {
                         CURRENT_VERSION = currentVersion()
@@ -147,16 +148,18 @@ pipeline {
                 branch 'develop'
             }
             steps {
-                println '07# Stage - Release Promotion Branch main'
-                println '(develop): Release Promotion Branch main update pom version'
-                script {
-                    def releaseVersion = CURRENT_VERSION.replace('-SNAPSHOT', '')
+                container('maven') {
+                    println '07# Stage - Release Promotion Branch main'
+                    println '(develop): Release Promotion Branch main update pom version'
+                    script {
+                        def releaseVersion = CURRENT_VERSION.replace('-SNAPSHOT', '')
 
-                    sh "mvn versions:set -DnewVersion=${releaseVersion}"
+                        sh "mvn versions:set -DnewVersion=${releaseVersion}"
 
-                    sh 'git add pom.xml'
-                    sh "git commit -m 'Release version ${releaseVersion}'"
-                    sh 'git push origin master'
+                        sh 'git add pom.xml'
+                        sh "git commit -m 'Release version ${releaseVersion}'"
+                        sh 'git push origin master'
+                    }
                 }
             }
         }
@@ -165,17 +168,19 @@ pipeline {
                 branch 'main'
             }
             steps {
-                println '07# Stage - Release Promotion Branch develop'
-                println '(main): Release Promotion Branch develop update pom version'
-                script {
-                    def (major, minor, patch) = CURRENT_VERSION.split('\\.')
-                    def newSnapshotVersion = "${major}.${minor}.${patch.toInteger() + 1}-SNAPSHOT"
+                container('maven') {
+                    println '07# Stage - Release Promotion Branch develop'
+                    println '(main): Release Promotion Branch develop update pom version'
+                    script {
+                        def (major, minor, patch) = CURRENT_VERSION.split('\\.')
+                        def newSnapshotVersion = "${major}.${minor}.${patch.toInteger() + 1}-SNAPSHOT"
 
-                    sh "mvn versions:set -DnewVersion=${newSnapshotVersion}"
+                        sh "mvn versions:set -DnewVersion=${newSnapshotVersion}"
 
-                    sh 'git add pom.xml'
-                    sh "git commit -m 'Release version to ${newSnapshotVersion}'"
-                    sh 'git push origin develop'
+                        sh 'git add pom.xml'
+                        sh "git commit -m 'Release version to ${newSnapshotVersion}'"
+                        sh 'git push origin develop'
+                    }
                 }
             }
         }
