@@ -14,7 +14,7 @@ pipeline {
                         pwd
                     '''
                     script {
-                        env.CURRENT_VERSION = currentVersión()
+                        env.CURRENT_VERSION = currentVersion()
                     }
                 }
                 println '01# Stage - Check Environment'
