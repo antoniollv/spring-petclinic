@@ -65,7 +65,7 @@ pipeline {
                 }
             }
             environment {
-                MAVE_REPOSITORY = "${env.GIT_BRANCH == 'main' ? 'maven-release' : (env.GIT_BRANCH == 'development' ? 'maven-snapshots' : '')}"
+                MAVE_REPOSITORY = "${env.GIT_BRANCH == 'main' ? 'maven-release' : (env.GIT_BRANCH == 'develop' ? 'maven-snapshots' : '')}"
             }
             steps {
                 container('maven') {
@@ -115,7 +115,7 @@ pipeline {
                 }
             }
             environment {
-                PORT = "${env.GIT_BRANCH == 'origin/main' ? '80' : (env.GIT_BRANCH == 'origin/development' ? '8080' : '')}"
+                PORT = "${env.GIT_BRANCH == 'main' ? '80' : (env.GIT_BRANCH == 'develop' ? '8080' : '')}"
             }
 
             steps {
@@ -157,7 +157,7 @@ pipeline {
                         sh "mvn versions:set -DnewVersion=${releaseVersion}"
 
                         sh 'git add pom.xml'
-                        sh "git commit -m 'Release version ${releaseVersion}'"
+                        sh "git commit -m 'Jenkins promotion ${releaseVersion}'"
                         sh 'git push origin master'
                     }
                 }
@@ -178,7 +178,7 @@ pipeline {
                         sh "mvn versions:set -DnewVersion=${newSnapshotVersion}"
 
                         sh 'git add pom.xml'
-                        sh "git commit -m 'Release version to ${newSnapshotVersion}'"
+                        sh "git commit -m 'Jenkins promotion ${newSnapshotVersion}'"
                         sh 'git push origin develop'
                     }
                 }
@@ -189,6 +189,5 @@ pipeline {
 
 def currentVersion() {
     def pomVersion = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
-    echo pomVersion
     return pomVersion
 }
