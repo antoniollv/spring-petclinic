@@ -163,7 +163,7 @@ pipeline {
 
                         sh 'git add pom.xml'
                         sh "git commit -m 'Jenkins promotion ${releaseVersion}'"
-                        sh 'git checkout main'
+                        sh 'git checkout -b main || git checkout main'
                         sh 'git push origin main'
                     }
                 }
@@ -186,7 +186,7 @@ pipeline {
                         sh 'git add pom.xml'
                         sh "git commit -m 'Jenkins promotion ${newSnapshotVersion}'"
 
-                        sh 'git checkout develop'
+                        sh 'git checkout -b develop || git checkout develop'
                         sh 'git push origin develop'
                     }
                 }
