@@ -14,6 +14,7 @@ pipeline {
                         pwd
                         env
                     '''
+                    sh "gir config --global --add safe.directory $PWD"
                     script {
                         CURRENT_VERSION = currentVersion()
                     }
@@ -28,7 +29,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'main'
-                    //branch 'develop'
+                    branch 'develop'
                 }
             }
             steps {
@@ -43,7 +44,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'main'
-                    //branch 'develop'
+                    branch 'develop'
                 }
             }
             steps {
@@ -71,16 +72,15 @@ pipeline {
                 container('maven') {
                     println '04# Stage - Deploy Artifact'
                     println '(develop y main): Deploy artifact to repository.'
-                    echo env.MAVE_REPOSITORY
-                    // sh """
-                    //     mvn -e deploy:deploy-file \
-                    //         -Durl=http://nexus-service:8081/repository/${ env.MAVE_REPOSITORY } \
-                    //         -DgroupId=local.moradores \
-                    //         -DartifactId=spring-petclinic \
-                    //         -Dversion=${CURRENT_VERSION} \
-                    //         -Dpackaging=jar \
-                    //         -Dfile=target/spring-petclinic-${CURRENT_VERSION}.jar
-                    // """
+                    sh """
+                        mvn -e deploy:deploy-file \
+                            -Durl=http://nexus-service:8081/repository/${ env.MAVE_REPOSITORY } \
+                            -DgroupId=local.moradores \
+                            -DartifactId=spring-petclinic \
+                            -Dversion=${CURRENT_VERSION} \
+                            -Dpackaging=jar \
+                            -Dfile=target/spring-petclinic-${CURRENT_VERSION}.jar
+                    """
                 }
             }
         }
@@ -88,7 +88,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'main'
-                    //branch 'develop'
+                    branch 'develop'
                 }
             }
             steps {
@@ -116,31 +116,33 @@ pipeline {
             }
             environment {
                 PORT = "${env.GIT_BRANCH == 'main' ? '80' : (env.GIT_BRANCH == 'develop' ? '8080' : '')}"
+                ENVIRONMENT = "${env.GIT_BRANCH == 'main' ? 'pro' : (env.GIT_BRANCH == 'develop' ? 'dev' : '')}"
             }
 
             steps {
                 println '06# Stage - Deploy petclinic'
                 println '(develop y main): Deploy petclinic app to MicroK8s.'
-                echo env.PORT
-                // sh '''
-                //     curl -LO "https://dl.k8s.io/release/$(curl -L \
-                //         -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                //     chmod +x kubectl
-                //     mkdir -p ~/.local/bin
-                //     #mv ./kubectl ~/.local/bin/kubectl
+                sh """
+                    curl -LO "https://dl.k8s.io/release/$(curl -L \
+                        -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mkdir -p ~/.local/bin
+                    #mv ./kubectl ~/.local/bin/kubectl
 
-                //     ./kubectl version --client
+                    ./kubectl version --client
 
-                //     export IP_SERVICIO_NEXUS=$(kubectl get services| grep 'nexus' | awk '{print $3}')
+                    export IP_SERVICIO_NEXUS=$(kubectl get services| grep 'nexus' | awk '{print $3}')
 
-                //     ./kubectl create deployment petclinic \
-                //         --image $IP_SERVICIO_NEXUS:8082/repository/docker/spring-petclinic:latest || \
-                //         echo 'Deplyment petclinic already exists, creating service...'
-                //     ./kubectl expose deployment petclinic --port 8080 --target-port 8080 \
-                //         --selector app=petclinic --type ClusterIP --name petclinic
+                    ./kubectl delete service petclinic-$ENVIRONMENT || echo 'Service not found'
+                    ./kubectl delete deployment petclinic-$ENVIRONMENT || echo 'Deployment not found'
 
-                //     ./kubectl get all
-                // '''
+                    ./kubectl create deployment petclinic-$ENVIRONMENT \
+                        --image $IP_SERVICIO_NEXUS:8082/repository/docker/spring-petclinic:latest
+                    ./kubectl expose deployment petclinic-$ENVIRONMENT --port $PORT --target-port 8080 \
+                        --selector app=petclinic-$ENVIRONMENT --type ClusterIP --name petclinic-$ENVIRONMENT
+
+                    ./kubectl get all
+                """
             }
         }
         stage('Release Promotion Branch main') {
