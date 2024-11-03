@@ -14,7 +14,7 @@ pipeline {
                         pwd
                         env
                     '''
-                    sh "gir config --global --add safe.directory $PWD"
+                    sh "git config --global --add safe.directory $PWD"
                     script {
                         CURRENT_VERSION = currentVersion()
                     }
