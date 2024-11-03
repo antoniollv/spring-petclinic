@@ -183,5 +183,7 @@ pipeline {
 }
 
 def currentVersion() {
-    return sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+    def pomVersion = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+    echo pomVersion
+    return pomVersion
 }
