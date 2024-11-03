@@ -163,6 +163,7 @@ pipeline {
 
                         sh 'git add pom.xml'
                         sh "git commit -m 'Jenkins promotion ${releaseVersion}'"
+                        sh 'git pull --rebase origin main'
                         sh 'git push origin main'
                     }
                 }
@@ -184,6 +185,7 @@ pipeline {
 
                         sh 'git add pom.xml'
                         sh "git commit -m 'Jenkins promotion ${newSnapshotVersion}'"
+                        sh 'git pull --rebase origin develop'
                         sh 'git push origin develop'
                     }
                 }
