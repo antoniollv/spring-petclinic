@@ -14,7 +14,7 @@ pipeline {
                         pwd
                         env
                     '''
-                    sh "git config --global --add safe.directory $PWD"
+                    sh 'git config --global --add safe.directory $PWD'
                     script {
                         CURRENT_VERSION = currentVersion()
                     }
@@ -122,7 +122,7 @@ pipeline {
             steps {
                 println '06# Stage - Deploy petclinic'
                 println '(develop y main): Deploy petclinic app to MicroK8s.'
-                sh """
+                sh '''
                     curl -LO "https://dl.k8s.io/release/\$(curl -L \
                         -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                     chmod +x kubectl
@@ -142,7 +142,7 @@ pipeline {
                         --selector app=petclinic-$ENVIRONMENT --type ClusterIP --name petclinic-$ENVIRONMENT
 
                     ./kubectl get all
-                """
+                '''
             }
         }
         stage('Release Promotion Branch main') {
